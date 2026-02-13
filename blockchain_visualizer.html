@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151937;
+            --bg-card: #1a1f3a;
+            --accent-primary: #00ffff;
+            --accent-secondary: #ff00ff;
+            --accent-success: #00ff88;
+            --accent-warning: #ffaa00;
+            --accent-danger: #ff3366;
+            --text-primary: #e0e6ff;
+            --text-secondary: #8892b0;
+            --border-color: #2d3561;
+            --shadow-glow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            animation: glowPulse 3s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.6)); }
+            50% { filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-glow);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        input, select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-primary);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #ff3366, #ff6699);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.6s ease-out backwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .stat-value.valid {
+            color: var(--accent-success);
+        }
+
+        .stat-value.invalid {
+            color: var(--accent-danger);
+        }
+
+        /* Blockchain Visualization */
+        .blockchain-container {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .chain-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--accent-primary) 0%, 
+                var(--accent-secondary) 50%, 
+                var(--accent-primary) 100%);
+            transform: translateY(-50%);
+            z-index: 0;
+            animation: flowGradient 3s ease-in-out infinite;
+        }
+
+        @keyframes flowGradient {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .blocks-wrapper {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 3rem 1rem;
+            position: relative;
+            z-index: 1;
+            scroll-behavior: smooth;
+        }
+
+        .blocks-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .blocks-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .blocks-wrapper::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        .block {
+            min-width: 350px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.4s ease;
+            animation: blockAppear 0.6s ease-out backwards;
+        }
+
+        @keyframes blockAppear {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .block:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.3);
+            transform: translateY(-10px);
+        }
+
+        .block.genesis {
+            border-color: var(--accent-success);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .block.invalid {
+            border-color: var(--accent-danger);
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .block-index {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent-primary);
+        }
+
+        .block-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+        }
+
+        .block-badge.genesis {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--accent-success);
+            border: 1px solid var(--accent-success);
+        }
+
+        .block-badge.valid {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--accent-success);
+            border: 1px solid var(--accent-success);
+        }
+
+        .block-badge.invalid {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        .block-field {
+            margin: 0.75rem 0;
+        }
+
+        .field-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hash-value {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .timestamp-value {
+            color: var(--accent-secondary);
+        }
+
+        /* Mining Animation */
+        .mining-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            border: 3px solid var(--accent-primary);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .mining-indicator.active {
+            display: block;
+        }
+
+        .mining-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--bg-secondary);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .mining-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .mining-subtext {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                min-width: 100%;
+            }
+
+            .block {
+                min-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛓️ Blockchain</h1>
+            <p class="subtitle">Interactive Visualization</p>
+        </header>
+
+        <div class="control-panel">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="difficulty">Mining Difficulty</label>
+                    <input type="range" id="difficulty" min="1" max="5" value="3">
+                    <span id="difficultyValue" style="color: var(--accent-primary); font-weight: 700;">3</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="blockData">Transaction Data</label>
+                    <input type="text" id="blockData" placeholder='{"from":"Majd","to":"Issam","amount":50}'>
+                </div>
+
+                <div class="control-group">
+                    <label for="blockIndex">Tamper Block Index</label>
+                    <input type="number" id="blockIndex" min="0" value="1" placeholder="Block #">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="addBlock">⛏️ Mine New Block</button>
+                <button id="validateChain" class="success">✓ Validate Chain</button>
+                <button id="tamperBlock" class="danger">⚠️ Tamper Block</button>
+                <button id="resetChain">↺ Reset Chain</button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="stat-card">
+                <div class="stat-label">Chain Length</div>
+                <div class="stat-value" id="chainLength">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Difficulty</div>
+                <div class="stat-value" id="currentDifficulty">3</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Mining Time</div>
+                <div class="stat-value" id="totalTime">0s</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Chain Status</div>
+                <div class="stat-value valid" id="chainStatus">VALID</div>
+            </div>
+        </div>
+
+        <div class="blockchain-container">
+            <div class="chain-line"></div>
+            <div class="blocks-wrapper" id="blocksContainer"></div>
+        </div>
+    </div>
+
+    <div class="mining-indicator" id="miningIndicator">
+        <div class="mining-spinner"></div>
+        <div class="mining-text">⛏️ MINING BLOCK</div>
+        <div class="mining-subtext">Computing proof of work...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // Blockchain Implementation
+        class Block {
+            constructor(index, data, previousHash) {
+                this.index = index;
+                this.timestamp = Date.now();
+                this.data = data;
+                this.previousHash = previousHash;
+                this.nonce = 0;
+                this.hash = this.calculateHash();
+            }
+
+            calculateHash() {
+                return CryptoJS.SHA256(
+                    this.index +
+                    this.timestamp +
+                    JSON.stringify(this.data) +
+                    this.previousHash +
+                    this.nonce
+                ).toString();
+            }
+
+            async mineBlock(difficulty) {
+                const target = '0'.repeat(difficulty);
+                
+                return new Promise((resolve) => {
+                    const mine = () => {
+                        if (!this.hash.startsWith(target)) {
+                            this.nonce++;
+                            this.hash = this.calculateHash();
+                            
+                            // Allow UI to update
+                            if (this.nonce % 1000 === 0) {
+                                setTimeout(mine, 0);
+                            } else {
+                                mine();
+                            }
+                        } else {
+                            resolve();
+                        }
+                    };
+                    mine();
+                });
+            }
+        }
+
+        class Blockchain {
+            constructor(difficulty) {
+                this.chain = [];
+                this.difficulty = difficulty;
+                this.totalMiningTime = 0;
+                this.createGenesisBlock();
+            }
+
+            createGenesisBlock() {
+                const genesis = new Block(0, 'Genesis Block', '0');
+                genesis.hash = genesis.calculateHash();
+                this.chain.push(genesis);
+            }
+
+            getLatestBlock() {
+                return this.chain[this.chain.length - 1];
+            }
+
+            async addBlock(data) {
+                const previousBlock = this.getLatestBlock();
+                const newBlock = new Block(this.chain.length, data, previousBlock.hash);
+                
+                const startTime = Date.now();
+                await newBlock.mineBlock(this.difficulty);
+                const endTime = Date.now();
+                
+                this.totalMiningTime += (endTime - startTime) / 1000;
+                this.chain.push(newBlock);
+                
+                return newBlock;
+            }
+
+            isValid() {
+                for (let i = 1; i < this.chain.length; i++) {
+                    const currentBlock = this.chain[i];
+                    const previousBlock = this.chain[i - 1];
+
+                    if (currentBlock.hash !== currentBlock.calculateHash()) {
+                        return false;
+                    }
+
+                    if (currentBlock.previousHash !== previousBlock.hash) {
+                        return false;
+                    }
+
+                    const target = '0'.repeat(this.difficulty);
+                    if (!currentBlock.hash.startsWith(target)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        // UI Controller
+        let blockchain = new Blockchain(3);
+
+        function renderBlockchain() {
+            const container = document.getElementById('blocksContainer');
+            container.innerHTML = '';
+
+            blockchain.chain.forEach((block, index) => {
+                const blockEl = document.createElement('div');
+                blockEl.className = 'block';
+                if (index === 0) blockEl.classList.add('genesis');
+                
+                blockEl.style.animationDelay = `${index * 0.1}s`;
+
+                const isBlockValid = block.hash === block.calculateHash() && 
+                                    (index === 0 || block.previousHash === blockchain.chain[index - 1].hash);
+                
+                if (!isBlockValid && index !== 0) {
+                    blockEl.classList.add('invalid');
+                }
+
+                blockEl.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-index">#${block.index}</div>
+                        <div class="block-badge ${index === 0 ? 'genesis' : (isBlockValid ? 'valid' : 'invalid')}">
+                            ${index === 0 ? 'GENESIS' : (isBlockValid ? 'VALID' : 'INVALID')}
+                        </div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Timestamp</div>
+                        <div class="field-value timestamp-value">${new Date(block.timestamp).toLocaleString()}</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Data</div>
+                        <div class="field-value">${typeof block.data === 'string' ? block.data : JSON.stringify(block.data)}</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Previous Hash</div>
+                        <div class="field-value hash-value">${block.previousHash.substring(0, 20)}...</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Hash</div>
+                        <div class="field-value hash-value">${block.hash.substring(0, 20)}...</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Nonce</div>
+                        <div class="field-value">${block.nonce.toLocaleString()}</div>
+                    </div>
+                `;
+
+                container.appendChild(blockEl);
+            });
+
+            // Update stats
+            document.getElementById('chainLength').textContent = blockchain.chain.length;
+            document.getElementById('currentDifficulty').textContent = blockchain.difficulty;
+            document.getElementById('totalTime').textContent = blockchain.totalMiningTime.toFixed(2) + 's';
+            
+            updateChainStatus();
+
+            // Scroll to latest block
+            setTimeout(() => {
+                container.scrollLeft = container.scrollWidth;
+            }, 100);
+        }
+
+        function updateChainStatus() {
+            const statusEl = document.getElementById('chainStatus');
+            const isValid = blockchain.isValid();
+            
+            statusEl.textContent = isValid ? 'VALID' : 'INVALID';
+            statusEl.className = 'stat-value ' + (isValid ? 'valid' : 'invalid');
+        }
+
+        function showMiningIndicator() {
+            document.getElementById('miningIndicator').classList.add('active');
+        }
+
+        function hideMiningIndicator() {
+            document.getElementById('miningIndicator').classList.remove('active');
+        }
+
+        // Event Listeners
+        document.getElementById('difficulty').addEventListener('input', (e) => {
+            const value = e.target.value;
+            document.getElementById('difficultyValue').textContent = value;
+            blockchain.difficulty = parseInt(value);
+        });
+
+        document.getElementById('addBlock').addEventListener('click', async () => {
+            const dataInput = document.getElementById('blockData');
+            let data = dataInput.value.trim();
+            
+            if (!data) {
+                data = `{"from":"User","to":"System","amount":${Math.floor(Math.random() * 100)}}`;
+            }
+
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                // Keep as string if not valid JSON
+            }
+
+            showMiningIndicator();
+            
+            try {
+                await blockchain.addBlock(data);
+                renderBlockchain();
+                dataInput.value = '';
+            } catch (error) {
+                alert('Error mining block: ' + error.message);
+            } finally {
+                hideMiningIndicator();
+            }
+        });
+
+        document.getElementById('validateChain').addEventListener('click', () => {
+            updateChainStatus();
+            const isValid = blockchain.isValid();
+            alert(isValid ? '✓ Blockchain is VALID!' : '✗ Blockchain is INVALID!');
+        });
+
+        document.getElementById('tamperBlock').addEventListener('click', () => {
+            const blockIndex = parseInt(document.getElementById('blockIndex').value);
+            
+            if (blockIndex < 0 || blockIndex >= blockchain.chain.length) {
+                alert('Invalid block index!');
+                return;
+            }
+
+            blockchain.chain[blockIndex].data = 'TAMPERED DATA - ' + Date.now();
+            renderBlockchain();
+            alert(`⚠️ Block #${blockIndex} has been tampered with! Validate the chain to see the result.`);
+        });
+
+        document.getElementById('resetChain').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the blockchain?')) {
+                blockchain = new Blockchain(parseInt(document.getElementById('difficulty').value));
+                renderBlockchain();
+            }
+        });
+
+        // Initial render
+        renderBlockchain();
+
+        // Add some demo blocks on load
+        setTimeout(async () => {
+            showMiningIndicator();
+            await blockchain.addBlock({"from":"Majd","to":"Issam","amount":50});
+            renderBlockchain();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await blockchain.addBlock({"from":"Issam","to":"Ahmed","amount":25});
+            renderBlockchain();
+            
+            hideMiningIndicator();
+        }, 1000);
+    </script>
+</body>
+</html>
