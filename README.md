@@ -1,6 +1,19 @@
 # Ruby Blockchain Implementation
 
+<div align="center">
+
+![Ruby](https://img.shields.io/badge/Ruby-2.5+-CC342D?style=for-the-badge&logo=ruby&logoColor=white)
+![Sinatra](https://img.shields.io/badge/Sinatra-3.0-000000?style=for-the-badge&logo=sinatra&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-00FFFF?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-00FF88?style=for-the-badge)
+
+</div>
+
 A simple yet comprehensive blockchain implementation in Ruby that demonstrates the core concepts of blockchain technology including hashing, proof-of-work, and chain validation.
+
+![Blockchain Visualizer](screenshot.png)
+
+*Interactive web interface with real-time blockchain visualization, cyberpunk aesthetics, and live mining animations.*
 
 ## 🎯 Features
 
@@ -12,6 +25,20 @@ A simple yet comprehensive blockchain implementation in Ruby that demonstrates t
 - **Genesis Block**: Automatic creation of the first block in the chain
 - **🎨 Interactive Web Interface**: Beautiful real-time visualization with cyberpunk aesthetics
 - **REST API**: Full API for blockchain operations
+
+## 🌟 Web Interface Highlights
+
+<div align="center">
+  <img src="screenshot.png" alt="Blockchain Web Interface" width="800"/>
+</div>
+
+**Features:**
+- 🎨 **Cyberpunk Design** - Neon colors, animated grid backgrounds, smooth transitions
+- ⛏️ **Live Mining** - Watch blocks being mined in real-time with visual feedback
+- 📊 **Statistics Dashboard** - Track chain length, difficulty, mining time, and validation status
+- 🔍 **Tamper Detection** - Test blockchain security by modifying blocks
+- 🎯 **Interactive Controls** - Adjustable difficulty, custom transactions, one-click validation
+- 📱 **Responsive** - Works on desktop, tablet, and mobile devices
 
 ## 📚 How It Works
 
@@ -92,8 +119,8 @@ blockchain = Blockchain.new(3)
 
 # Add a block with transaction data
 blockchain.add_block({
-  from: "Majd",
-  to: "Issam",
+  from: "Alice",
+  to: "Bob",
   amount: 50
 }.to_json)
 
@@ -162,7 +189,7 @@ Mine a new block with custom data.
 ```bash
 curl -X POST http://localhost:4567/api/mine \
   -H "Content-Type: application/json" \
-  -d '{"data": {"from":"Majd","to":"Issam","amount":50}}'
+  -d '{"data": {"from":"Alice","to":"Bob","amount":50}}'
 ```
 
 #### `POST /api/difficulty`
@@ -210,7 +237,7 @@ blockchain = Blockchain.new(3)
 Mines and adds a new block to the chain with the given data.
 
 ```ruby
-blockchain.add_block("Transaction: Majd -> Issam: 50 BTC")
+blockchain.add_block("Transaction: Alice -> Bob: 50 BTC")
 ```
 
 #### `valid?`
@@ -293,8 +320,8 @@ blockchain = Blockchain.new(2)
 
 blockchain.add_block({
   type: "payment",
-  from: "Majd",
-  to: "Issam",
+  from: "Alice",
+  to: "Bob",
   amount: 100,
   currency: "USD"
 }.to_json)
