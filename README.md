@@ -10,6 +10,8 @@ A simple yet comprehensive blockchain implementation in Ruby that demonstrates t
 - **Tamper Detection**: Automatically detects if any block has been modified
 - **JSON Export**: Export the blockchain to JSON format
 - **Genesis Block**: Automatic creation of the first block in the chain
+- **🎨 Interactive Web Interface**: Beautiful real-time visualization with cyberpunk aesthetics
+- **REST API**: Full API for blockchain operations
 
 ## 📚 How It Works
 
@@ -50,6 +52,35 @@ The blockchain validates itself by checking:
 If any block is tampered with, the validation fails.
 
 ## 🚀 Usage
+
+### Web Interface (Recommended!)
+
+The easiest way to interact with the blockchain is through the beautiful web interface:
+
+1. **Install dependencies**:
+```bash
+bundle install
+```
+
+2. **Start the web server**:
+```bash
+ruby server.rb
+```
+
+3. **Open your browser** to `http://localhost:4567`
+
+**Web Interface Features**:
+- 🎨 Real-time blockchain visualization with cyberpunk aesthetics
+- ⛏️ Mine new blocks with visual feedback
+- 🔍 Validate the entire chain
+- ⚠️ Tamper with blocks to see security in action
+- 📊 Live statistics and status indicators
+- 🎯 Adjustable mining difficulty
+- ✨ Smooth animations and responsive design
+
+![Blockchain Visualizer](https://img.shields.io/badge/Status-Interactive-00ffff?style=for-the-badge)
+
+### Command Line Interface
 
 ### Basic Example
 
@@ -113,6 +144,58 @@ Chain is VALID ✓
 ```
 
 ## 📖 API Reference
+
+### REST API Endpoints
+
+The web server provides a full REST API:
+
+#### `GET /api/chain`
+Get the complete blockchain with all blocks.
+
+```bash
+curl http://localhost:4567/api/chain
+```
+
+#### `POST /api/mine`
+Mine a new block with custom data.
+
+```bash
+curl -X POST http://localhost:4567/api/mine \
+  -H "Content-Type: application/json" \
+  -d '{"data": {"from":"Majd","to":"Issam","amount":50}}'
+```
+
+#### `POST /api/difficulty`
+Change the mining difficulty (1-6).
+
+```bash
+curl -X POST http://localhost:4567/api/difficulty \
+  -H "Content-Type: application/json" \
+  -d '{"difficulty": 4}'
+```
+
+#### `POST /api/tamper`
+Tamper with a specific block (for testing).
+
+```bash
+curl -X POST http://localhost:4567/api/tamper \
+  -H "Content-Type: application/json" \
+  -d '{"index": 1, "data": "TAMPERED"}'
+```
+
+#### `GET /api/validate`
+Validate the blockchain integrity.
+
+```bash
+curl http://localhost:4567/api/validate
+```
+
+#### `POST /api/reset`
+Reset the blockchain to genesis.
+
+```bash
+curl -X POST http://localhost:4567/api/reset
+```
 
 ### Blockchain Class
 
@@ -189,6 +272,16 @@ This implementation demonstrates:
 ## 🛠️ Requirements
 
 - Ruby 2.5 or higher
+- Bundler (for web interface)
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+
+**For Web Interface**:
+```bash
+gem install bundler
+bundle install
+```
+
+**For Command Line Only**:
 - Standard library only (no external gems required)
 
 ## 📝 Example Use Cases
@@ -214,7 +307,7 @@ blockchain.add_block({
   type: "document",
   hash: Digest::SHA256.hexdigest(document_content),
   timestamp: Time.now.to_i,
-  author: "Majd Machlouch"
+  author: "John Doe"
 }.to_json)
 ```
 
@@ -249,8 +342,11 @@ Feel free to fork this repository and submit pull requests. Some ideas for impro
 - Add transaction signing with public/private keys
 - Implement a Merkle tree for transactions
 - Add network simulation with multiple nodes
-- Create a simple REST API
-- Add a web interface for visualization
+- Enhance the web UI with more visualizations
+- Create mobile-responsive improvements
+- Add dark/light theme toggle
+- Implement WebSocket for real-time updates
+- Add a REST API client library
 
 ## 📄 License
 
